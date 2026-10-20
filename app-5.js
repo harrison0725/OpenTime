@@ -1,0 +1,10 @@
+syncUI();defaultsForDates();updateSplitControls();buildSchedule();
+$('preferMorning').addEventListener('change',()=>{if($('preferMorning').checked)$('preferEvening').checked=false;buildSchedule()});
+$('preferEvening').addEventListener('change',()=>{if($('preferEvening').checked)$('preferMorning').checked=false;buildSchedule()});
+$('splitMode').addEventListener('change',updateSplitControls);
+$('splitCount').addEventListener('input',updateSplitControls);
+$('splitMinutes').addEventListener('input',updateSplitControls);
+$('taskMinutes').addEventListener('input',updateSplitControls);
+$('addTaskBtn').addEventListener('click',addTask);$('addBusyBtn').addEventListener('click',addBusy);$('addFreeBtn').addEventListener('click',addProtected);$('addWeeklyBtn').addEventListener('click',addWeekly);
+$('rebuildBtn').addEventListener('click',()=>{state.pinned=[];buildSchedule()});
+['wakeTime','sleepTime','workStart','workEnd','blockLength','breakLength'].forEach(idv=>$(idv).addEventListener('change',buildSchedule));
