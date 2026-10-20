@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenTime V1.3</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+<header><div class="brand">OpenTime</div><div class="date" id="todayLabel"></div></header>
+
+<div class="hero">
+  <div>
+    <h1>Your week adapts around you.</h1>
+    <p id="summary">Build flexible work around fixed weekly routines for tasks, commitments, and personal time.</p>
+    <div class="statbar" id="stats"></div>
+  </div>
+  <div class="row"><button class="btn secondary" id="rebuildBtn" type="button">Reset manual moves</button></div>
+</div>
+
+<div class="grid">
+  <section class="card">
+    <div class="day-tabs" id="dayTabs"></div>
+    <div id="warning" class="warn"></div>
+    <div class="legend">
+      <span><i class="dot" style="background:#eef2ff"></i>Work</span>
+      <span><i class="dot" style="background:#f3f4f6"></i>Fixed</span>
+      <span><i class="dot" style="background:#d1fae5"></i>Protected time</span>
+    </div>
+    <div class="note" style="margin-bottom:10px">Drag a work block to move that same session. Manual blocks count toward your requested session total, so dragging one will no longer create an extra split. Drag its top or bottom edge only when you actually want to resize it.</div>
+    <div class="timeline-wrap">
+      <div class="time-axis" id="timeAxis"></div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </section>
+
+  <aside class="stack">
+    <section class="card">
+      <h2>Daily preferences</h2>
+      <div class="settings">
+        <label>Wake up<input id="wakeTime" type="time"></label>
+        <label>Sleep<input id="sleepTime" type="time"></label>
+        <label>Earliest work<input id="workStart" type="time"></label>
+        <label>Latest work<input id="workEnd" type="time"></label>
+        <label>Preferred block<select id="blockLength"><option value="30">30 min</option><option value="45">45 min</option><option value="60">60 min</option><option value="90">90 min</option></select></label>
+        <label>Break<select id="breakLength"><option value="0">None</option><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option></select></label>
+      </div>
+      <div class="stack" style="margin-top:10px">
+        <label class="toggleline"><input id="preferMorning" type="checkbox"> Prefer morning work</label>
+        <label class="toggleline"><input id="preferEvening" type="checkbox"> Prefer evening work</label>
+      </div>
+      <div class="note" style="margin-top:9px">The visible day starts at wake-up time. Tasks are only placed inside your work window.</div>
+    </section>
+
+    <section class="card">
+      <h2>Add task</h2>
+      <div class="stack">
+        <label>Task<input id="taskName" placeholder="e.g. Legal Event Analysis"></label>
+        <div class="row">
+          <label style="flex:1">Due<input id="taskDue" type="datetime-local"></label>
+          <label style="width:120px">Minutes<input id="taskMinutes" type="number" min="5" step="5" value="60"></label>
+        </div>
+        <label>Priority<select id="taskPriority"><option value="1">Low</option><option value="2" selected>Medium</option><option value="3">High</option></select></label>
+        <label>How should OpenTime split it?
+          <select id="splitMode">
+            <option value="auto" selected>Automatic</option>
+            <option value="custom">Custom split</option>
+          </select>
+        </label>
+        <div id="customSplitControls" class="settings" style="display:none">
+          <label>Number of sessions
+            <input id="splitCount" type="number" min="1" max="14" step="1" value="3">
+          </label>
+          <label>Target minutes/session
+            <input id="splitMinutes" type="number" min="15" max="240" step="15" value="60">
+          </label>
+        </div>
+        <div id="splitPreview" class="note"></div>
+        <button class="btn primary" id="addTaskBtn" type="button">Add task</button>
+        <div class="note">Automatic mode chooses sensible sessions for you. Custom mode honors the requested session count when enough eligible days and contiguous time are available before the deadline. Each session is at least 15 minutes, and the final session adjusts so total work stays exact.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Add fixed commitment</h2>
+      <div class="stack">
+        <label>Date<input id="busyDate" type="date"></label>
+        <label>Label<input id="busyName" placeholder="Class, ROTC, meeting..."></label>
+        <div class="row">
+          <label style="flex:1">Start<input id="busyStart" type="time" value="10:30"></label>
+          <label style="flex:1">End<input id="busyEnd" type="time" value="11:20"></label>
+        </div>
+        <button class="btn secondary" id="addBusyBtn" type="button">Add commitment</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Protect personal time</h2>
+      <div class="stack">
+        <label>Date<input id="freeDate" type="date"></label>
+        <label>Label<input id="freeName" placeholder="Lunch, gym, relax..."></label>
+        <div class="row">
+          <label style="flex:1">Start<input id="freeStart" type="time" value="12:00"></label>
+          <label style="flex:1">End<input id="freeEnd" type="time" value="13:00"></label>
+        </div>
+        <button class="btn secondary" id="addFreeBtn" type="button">Protect this time</button>
+      </div>
+      <div class="note" style="margin-top:8px">Free time is otherwise just the empty space left on your calendar. You only create a block when you specifically want that time protected.</div>
+    </section>
+
+    <section class="card">
+      <h2>Add weekly routine</h2>
+      <div class="stack">
+        <label>Type
+          <select id="weeklyType">
+            <option value="task">Task / recurring work</option>
+            <option value="commitment">Commitment</option>
+            <option value="personal">Personal</option>
+          </select>
+        </label>
+        <label>Name<input id="weeklyName" placeholder="Gym, lecture, laundry, club meeting..."></label>
+        <label>Every
+          <select id="weeklyDay">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+        </label>
+        <div class="row">
+          <label style="flex:1">Start<input id="weeklyStart" type="time" value="17:00"></label>
+          <label style="flex:1">End<input id="weeklyEnd" type="time" value="18:00"></label>
+        </div>
+        <button class="btn secondary" id="addWeeklyBtn" type="button">Add weekly routine</button>
+        <div class="note">This repeats automatically on the same weekday and time every week. OpenTime treats it as fixed and schedules flexible homework around it.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Tasks & commitments</h2>
+      <div class="stack" id="taskList"></div>
+    </section>
+  </aside>
+</div>
+</div>
+
+<script src="app-1.js"></script>
+<script src="app-2.js"></script>
+<script src="app-3.js"></script>
+<script src="app-4.js"></script>
+<script src="app-5.js"></script>
+</body>
+</html>
